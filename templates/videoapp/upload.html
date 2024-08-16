@@ -1,0 +1,8 @@
+<!-- upload_video.html -->
+<h1>Upload Video</h1>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Upload</button>
+</form>
+<a href="{% url 'video_list' %}">Back to Video List</a>

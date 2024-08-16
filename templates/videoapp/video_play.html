@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+    <video id="video" controls width="640" height="360"></video>
+    <div class="error-message" id="error-message" style="display: none;"></div>
+    <script>
+        var video = document.getElementById('video');
+        var videoSrc = '{{ video.hls_url|escapejs }}';  // Ensure proper escaping for JavaScript
+
+        if (Hls.isSupported()) {
+            var hls = new Hls();
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                video.play();
+            });
+            hls.on(Hls.Events.ERROR, function (event, data) {
+                var errorMessage = document.getElementById('error-message');
+                if (data.fatal) {
+                    switch (data.fatal) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            errorMessage.textContent = 'Network error: Unable to load the video.';
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            errorMessage.textContent = 'Media error: Unable to play the video.';
+                            break;
+                        case Hls.ErrorTypes.OTHER_ERROR:
+                            errorMessage.textContent = 'An unexpected error occurred.';
+                            break;
+                        default:
+                            errorMessage.textContent = 'An unexpected error occurred.';
+                            break;
+                    }
+                    errorMessage.style.display = 'block';
+                }
+            });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = videoSrc;
+            video.addEventListener('loadedmetadata', function() {
+                video.play();
+            });
+        }
+    </script>
+</body>
+</html>
